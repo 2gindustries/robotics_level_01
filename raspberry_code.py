@@ -2,7 +2,10 @@ import RPi.GPIO as GPIO
 import time
 
 ledPin = 11    # define ledPin
-
+trigPin = 16
+echoPin = 18
+MAX_DISTANCE = 220          # define the maximum measuring distance, unit: cm
+timeOut = MAX_DISTANCE*60   # calculate timeout according to the maximum measuring distance
 def setup():
     GPIO.setmode(GPIO.BOARD)       # use PHYSICAL GPIO Numbering
     GPIO.setup(ledPin, GPIO.OUT)   # set the ledPin to OUTPUT mode
@@ -29,13 +32,6 @@ if __name__ == '__main__':    # Program entrance
     except KeyboardInterrupt:   # Press ctrl-c to end the program.
         destroy()
         
-import time
-
-trigPin = 16
-echoPin = 18
-MAX_DISTANCE = 220          # define the maximum measuring distance, unit: cm
-timeOut = MAX_DISTANCE*60   # calculate timeout according to the maximum measuring distance
-
 def pulseIn(pin,level,timeOut): # obtain pulse time of a pin under timeOut
     t0 = time.time()
     while(GPIO.input(pin) != level):
