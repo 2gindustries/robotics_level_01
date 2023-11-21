@@ -1,36 +1,18 @@
 import RPi.GPIO as GPIO
 import time
+import pandas as pd
+import numpy as np
+import pickle
+from sklearn.exceptions import DataConversionWarning
+import warnings
+
+warnings.filterwarnings(action='ignore', category=UserWarning)
 
 ledPin = 11    # define ledPin
 trigPin = 16
 echoPin = 18
 MAX_DISTANCE = 220          # define the maximum measuring distance, unit: cm
 timeOut = MAX_DISTANCE*60   # calculate timeout according to the maximum measuring distance
-def setup():
-    GPIO.setmode(GPIO.BOARD)       # use PHYSICAL GPIO Numbering
-    GPIO.setup(ledPin, GPIO.OUT)   # set the ledPin to OUTPUT mode
-    GPIO.output(ledPin, GPIO.LOW)  # make ledPin output LOW level 
-    print (f'using {ledPin}')
-
-def loop():
-    while True:
-        GPIO.output(ledPin, GPIO.HIGH)  # make ledPin output HIGH level to turn on led
-        print ('led turned on >>>')     # print information on terminal
-        time.sleep(1)                   # Wait for 1 second
-        GPIO.output(ledPin, GPIO.LOW)   # make ledPin output LOW level to turn off led
-        print ('led turned off <<<')
-        time.sleep(1)                   # Wait for 1 second
-
-def destroy():
-    GPIO.cleanup()                      # Release all GPIO
-
-if __name__ == '__main__':    # Program entrance
-    print ('Program is starting ... \n')
-    setup()
-    try:
-        loop()
-    except KeyboardInterrupt:   # Press ctrl-c to end the program.
-        destroy()
         
 def pulseIn(pin,level,timeOut): # obtain pulse time of a pin under timeOut
     t0 = time.time()
@@ -53,17 +35,39 @@ def getSonar():     # get the measurement results of ultrasonic module,with unit
     return distance
     
 def setup():
-    GPIO.setmode(GPIO.BOARD)      # use PHYSICAL GPIO Numbering
+    GPIO.setmode(GPIO.BOARD)       # use PHYSICAL GPIO Numbering
+    GPIO.setup(ledPin, GPIO.OUT)   # set the ledPin to OUTPUT mode
+    GPIO.output(ledPin, GPIO.LOW)  # make ledPin output LOW level
     GPIO.setup(trigPin, GPIO.OUT)   # set trigPin to OUTPUT mode
     GPIO.setup(echoPin, GPIO.IN)    # set echoPin to INPUT mode
 
 def loop():
+    last_five_distances = []
     while(True):
         distance = getSonar() # get distance
+        last_five_distances.append(distance)
+        predicted_value = 0
+        if len(last_five_distances) > 5:
+            last_five_distances.pop(0)  # Remove the oldest distance value
+        print(last_five_distances)
+        if len(last_five_distances) == 5:
+            data_to_predict = np.array([last_five_distances])
+
+            # Make a prediction
+            predicted_value = loaded_model.predict(data_to_predict)
+            print("Predicted value:" , predicted_value)
+        if predicted_value <  10:
+            GPIO.output(ledPin, GPIO.HIGH)
+        else:
+            GPIO.output(ledPin, GPIO.LOW)
         print ("The distance is : %.2f cm"%(distance))
         time.sleep(1)
-        
+
+with open('data/linear_regression_model.pkl', 'rb') as file:
+    loaded_model = pickle.load(file)
+
 if __name__ == '__main__':     # Program entrance
+    GPIO.cleanup()
     print ('Program is starting...')
     setup()
     try:
