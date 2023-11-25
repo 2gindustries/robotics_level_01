@@ -28,4 +28,17 @@ A great way to get started with basic knowledge.
 ## 4. Extras
 **Note**: This README is a basic guide and assumes a fundamental understanding of Raspberry Pi, Python programming, and basic electronics. For detailed instructions and troubleshooting, you can contact me at enrique1999gilgarcia@gmail.com
 
-**Pending**: Uploading the diagram of the electronics.
+- View from the **front**.
+<p align="center">
+<img src="./img/1700916395512.jpg" alt="front view" width="500" height="300">
+</p>
+
+- View from the **top**.
+<p align="center">
+<img src="./img/1700916395535.jpg" alt="front view" width="500" height="300">
+</p>
+
+- **Connections** (using GPIO.setmode(GPIO.BOARD))
+1. ledPin = 11   # ledPin
+2. trigPin = 16  # Ultrasound
+3. echoPin = 18  # Ultrasound
